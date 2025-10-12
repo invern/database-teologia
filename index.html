@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ricerca Database Teologia</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2em;
+        }
+
+        .search-form {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        input, select {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        select:disabled {
+            background: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        button {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .result-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .result-field {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #667eea;
+            margin-right: 8px;
+        }
+
+        .result-value {
+            color: #333;
+        }
+
+        .links {
+            margin-top: 15px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .link-button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.95em;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .link-button:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .link-button.pdf {
+            background: #e53e3e;
+        }
+
+        .link-button.pdf:hover {
+            background: #c53030;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 2px solid #c3e6cb;
+            text-align: center;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .result-count {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .links {
+                flex-direction: column;
+            }
+
+            .link-button {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Ricerca Database Teologia</h1>
+        
+        <div id="status"></div>
+        
+        <div class="search-form">
+            <div class="form-group">
+                <label for="autore">Ricerca per Autore:</label>
+                <select id="autore" disabled>
+                    <option value="">-- Caricamento in corso --</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="anno">Ricerca per Anno:</label>
+                <select id="anno" disabled>
+                    <option value="">-- Caricamento in corso --</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="titolo">Ricerca per Titolo:</label>
+                <input type="text" id="titolo" placeholder="Inserisci una parola del titolo..." disabled>
+            </div>
+            
+            <button onclick="cerca()" id="btnCerca" disabled>Cerca</button>
+        </div>
+
+        <div id="risultati"></div>
+    </div>
+
+    <script>
+        // Percorso relativo al CSV nello stesso repository
+        const CSV_URL = './database.csv';
+        
+        let datiDatabase = [];
+
+        // Carica automaticamente all'avvio
+        window.onload = function() {
+            caricaDatabase();
+        };
+
+        function caricaDatabase() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '<div class="loading">Caricamento database in corso...</div>';
+
+            fetch(CSV_URL)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Impossibile caricare il database (HTTP ' + response.status + ')');
+                    }
+                    return response.text();
+                })
+                .then(csvText => {
+                    Papa.parse(csvText, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: function(results) {
+                            datiDatabase = results.data;
+                            console.log('Database caricato:', datiDatabase.length, 'records');
+                            abilitaRicerca();
+                            statusDiv.innerHTML = '<div class="success">✅ Database caricato con successo! (' + datiDatabase.length + ' record)</div>';
+                            // Nascondi il messaggio dopo 3 secondi
+                            setTimeout(() => {
+                                statusDiv.innerHTML = '';
+                            }, 3000);
+                        },
+                        error: function(error) {
+                            console.error('Errore parsing CSV:', error);
+                            statusDiv.innerHTML = '<div class="error">⚠️ Errore nel parsing del database. Verifica il formato del file CSV.</div>';
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Errore caricamento:', error);
+                    statusDiv.innerHTML = '<div class="error">⚠️ Impossibile caricare il database. Assicurati che il file database.csv sia presente nella stessa cartella.</div>';
+                });
+        }
+
+        function abilitaRicerca() {
+            popolaSelect();
+            document.getElementById('autore').disabled = false;
+            document.getElementById('anno').disabled = false;
+            document.getElementById('titolo').disabled = false;
+            document.getElementById('btnCerca').disabled = false;
+        }
+
+        function popolaSelect() {
+            // Popola select autori
+            const autori = new Set();
+            datiDatabase.forEach(record => {
+                if (record.Author && record.Author.trim()) {
+                    autori.add(record.Author.trim());
+                }
+            });
+            
+            const autoriOrdinati = Array.from(autori).sort((a, b) => 
+                a.toLowerCase().localeCompare(b.toLowerCase())
+            );
+            
+            const selectAutore = document.getElementById('autore');
+            selectAutore.innerHTML = '<option value="">-- Seleziona un autore --</option>';
+            autoriOrdinati.forEach(autore => {
+                const option = document.createElement('option');
+                option.value = autore;
+                option.textContent = autore;
+                selectAutore.appendChild(option);
+            });
+
+            // Popola select anni
+            const anni = new Set();
+            datiDatabase.forEach(record => {
+                if (record['Publication Year'] && record['Publication Year'].toString().trim()) {
+                    anni.add(record['Publication Year'].toString().trim());
+                }
+            });
+            
+            const anniOrdinati = Array.from(anni).sort((a, b) => b - a);
+            
+            const selectAnno = document.getElementById('anno');
+            selectAnno.innerHTML = '<option value="">-- Seleziona un anno --</option>';
+            anniOrdinati.forEach(anno => {
+                const option = document.createElement('option');
+                option.value = anno;
+                option.textContent = anno;
+                selectAnno.appendChild(option);
+            });
+        }
+
+        function cerca() {
+            const autore = document.getElementById('autore').value.trim();
+            const anno = document.getElementById('anno').value.trim();
+            const titolo = document.getElementById('titolo').value.toLowerCase().trim();
+
+            let risultati = datiDatabase.filter(record => {
+                let match = true;
+
+                if (autore) {
+                    match = match && record.Author && record.Author.trim() === autore;
+                }
+
+                if (anno) {
+                    match = match && record['Publication Year'] && 
+                           record['Publication Year'].toString().trim() === anno;
+                }
+
+                if (titolo) {
+                    match = match && record.Title && 
+                           record.Title.toLowerCase().includes(titolo);
+                }
+
+                return match;
+            });
+
+            mostraRisultati(risultati);
+        }
+
+        function mostraRisultati(risultati) {
+            const risultatiDiv = document.getElementById('risultati');
+
+            if (risultati.length === 0) {
+                risultatiDiv.innerHTML = '<div class="no-results">Nessun risultato trovato. Prova con altri criteri.</div>';
+                return;
+            }
+
+            let html = `<div class="result-count">Trovati ${risultati.length} risultat${risultati.length === 1 ? 'o' : 'i'}</div>`;
+
+            risultati.forEach(record => {
+                html += '<div class="result-item">';
+                
+                if (record.Author) {
+                    html += `<div class="result-field">
+                        <span class="result-label">Autore:</span>
+                        <span class="result-value">${record.Author}</span>
+                    </div>`;
+                }
+
+                if (record.Title) {
+                    html += `<div class="result-field">
+                        <span class="result-label">Titolo:</span>
+                        <span class="result-value">${record.Title}</span>
+                    </div>`;
+                }
+
+                if (record.Volume) {
+                    html += `<div class="result-field">
+                        <span class="result-label">Volume:</span>
+                        <span class="result-value">${record.Volume}</span>
+                    </div>`;
+                }
+
+                if (record.Issue) {
+                    html += `<div class="result-field">
+                        <span class="result-label">Fascicolo:</span>
+                        <span class="result-value">${record.Issue}</span>
+                    </div>`;
+                }
+
+                if (record.Pages) {
+                    html += `<div class="result-field">
+                        <span class="result-label">Pagine:</span>
+                        <span class="result-value">${record.Pages}</span>
+                    </div>`;
+                }
+
+                if (record['Publication Year']) {
+                    html += `<div class="result-field">
+                        <span class="result-label">Anno:</span>
+                        <span class="result-value">${record['Publication Year']}</span>
+                    </div>`;
+                }
+
+                if (record['Abstract Note'] && record['Abstract Note'].trim()) {
+                    html += `<div class="result-field" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                        <span class="result-label">Abstract:</span>
+                        <div class="result-value" style="margin-top: 8px; text-align: justify; line-height: 1.8;">${record['Abstract Note']}</div>
+                    </div>`;
+                }
+
+                const hasUrl = record.Url && record.Url.trim();
+                const hasPdf = record['File Attachments'] && record['File Attachments'].trim();
+                
+                if (hasUrl || hasPdf) {
+                    html += '<div class="links">';
+                    
+                    if (hasUrl) {
+                        html += `<a href="${record.Url}" target="_blank" class="link-button">📚 Record EBSCOhost</a>`;
+                    }
+
+                    if (hasPdf) {
+                        html += `<a href="${record['File Attachments']}" target="_blank" class="link-button pdf">📄 Scarica PDF</a>`;
+                    }
+
+                    html += '</div>';
+                }
+
+                html += '</div>';
+            });
+
+            risultatiDiv.innerHTML = html;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const titoloInput = document.getElementById('titolo');
+            if (titoloInput) {
+                titoloInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && !titoloInput.disabled) {
+                        cerca();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
