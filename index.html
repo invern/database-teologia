@@ -260,7 +260,10 @@
                 <input type="text" id="titolo" placeholder="Inserisci una parola del titolo..." disabled>
             </div>
             
-            <button onclick="cerca()" id="btnCerca" disabled>Cerca</button>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="cerca()" id="btnCerca" disabled style="flex: 1;">Cerca</button>
+                <button onclick="pulisciCampi()" id="btnPulisci" style="flex: 1; background: linear-gradient(135deg, #6c757d 0%, #495057 100%);">Pulisci campi</button>
+            </div>
         </div>
 
         <div id="risultati"></div>
@@ -364,6 +367,13 @@
             });
         }
 
+        function pulisciCampi() {
+            document.getElementById('autore').selectedIndex = 0;
+            document.getElementById('anno').selectedIndex = 0;
+            document.getElementById('titolo').value = '';
+            document.getElementById('risultati').innerHTML = '';
+        }
+
         function cerca() {
             const autore = document.getElementById('autore').value.trim();
             const anno = document.getElementById('anno').value.trim();
@@ -419,6 +429,13 @@
                     </div>`;
                 }
 
+                if (record['Publication Year']) {
+                    html += `<div class="result-field">
+                        <span class="result-label">Anno:</span>
+                        <span class="result-value">${record['Publication Year']}</span>
+                    </div>`;
+                }
+
                 if (record.Volume) {
                     html += `<div class="result-field">
                         <span class="result-label">Volume:</span>
@@ -437,13 +454,6 @@
                     html += `<div class="result-field">
                         <span class="result-label">Pagine:</span>
                         <span class="result-value">${record.Pages}</span>
-                    </div>`;
-                }
-
-                if (record['Publication Year']) {
-                    html += `<div class="result-field">
-                        <span class="result-label">Anno:</span>
-                        <span class="result-value">${record['Publication Year']}</span>
                     </div>`;
                 }
 
