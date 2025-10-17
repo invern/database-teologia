@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Laura Invernizzi - invernizzil@ftis.it">
+    <meta name="referrer" content="no-referrer">
     <title>Ricerca Database Teologia</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
@@ -244,14 +245,14 @@
         <div class="search-form">
             <div class="form-group">
                 <label for="autore">Ricerca per Autore:</label>
-                <select id="autore" disabled>
+                <select id="autore" disabled onchange="aggiornaFiltri()">
                     <option value="">-- Caricamento in corso --</option>
                 </select>
             </div>
             
             <div class="form-group">
                 <label for="anno">Ricerca per Anno:</label>
-                <select id="anno" disabled>
+                <select id="anno" disabled onchange="aggiornaFiltri()">
                     <option value="">-- Caricamento in corso --</option>
                 </select>
             </div>
@@ -326,12 +327,19 @@
             document.getElementById('btnCerca').disabled = false;
         }
 
-        function popolaSelect() {
+        function popolaSelect(filtroAutore = null, filtroAnno = null) {
             // Popola select autori
             const autori = new Set();
             datiDatabase.forEach(record => {
                 if (record.Author && record.Author.trim()) {
-                    autori.add(record.Author.trim());
+                    // Se c'è un filtro anno, mostra solo autori che hanno pubblicato in quell'anno
+                    if (filtroAnno) {
+                        if (record['Publication Year'] && record['Publication Year'].toString().trim() === filtroAnno) {
+                            autori.add(record.Author.trim());
+                        }
+                    } else {
+                        autori.add(record.Author.trim());
+                    }
                 }
             });
             
@@ -340,11 +348,15 @@
             );
             
             const selectAutore = document.getElementById('autore');
+            const autoreSelezionato = selectAutore.value;
             selectAutore.innerHTML = '<option value="">-- Seleziona un autore --</option>';
             autoriOrdinati.forEach(autore => {
                 const option = document.createElement('option');
                 option.value = autore;
                 option.textContent = autore;
+                if (autore === autoreSelezionato) {
+                    option.selected = true;
+                }
                 selectAutore.appendChild(option);
             });
 
@@ -352,20 +364,44 @@
             const anni = new Set();
             datiDatabase.forEach(record => {
                 if (record['Publication Year'] && record['Publication Year'].toString().trim()) {
-                    anni.add(record['Publication Year'].toString().trim());
+                    // Se c'è un filtro autore, mostra solo anni in cui ha pubblicato
+                    if (filtroAutore) {
+                        if (record.Author && record.Author.trim() === filtroAutore) {
+                            anni.add(record['Publication Year'].toString().trim());
+                        }
+                    } else {
+                        anni.add(record['Publication Year'].toString().trim());
+                    }
                 }
             });
             
             const anniOrdinati = Array.from(anni).sort((a, b) => b - a);
             
             const selectAnno = document.getElementById('anno');
+            const annoSelezionato = selectAnno.value;
             selectAnno.innerHTML = '<option value="">-- Seleziona un anno --</option>';
             anniOrdinati.forEach(anno => {
                 const option = document.createElement('option');
                 option.value = anno;
                 option.textContent = anno;
+                if (anno === annoSelezionato) {
+                    option.selected = true;
+                }
                 selectAnno.appendChild(option);
             });
+        }
+
+        function aggiornaFiltri() {
+            const autoreSelezionato = document.getElementById('autore').value;
+            const annoSelezionato = document.getElementById('anno').value;
+            
+            if (autoreSelezionato) {
+                popolaSelect(autoreSelezionato, null);
+            } else if (annoSelezionato) {
+                popolaSelect(null, annoSelezionato);
+            } else {
+                popolaSelect();
+            }
         }
 
         function pulisciCampi() {
@@ -373,6 +409,8 @@
             document.getElementById('anno').selectedIndex = 0;
             document.getElementById('titolo').value = '';
             document.getElementById('risultati').innerHTML = '';
+            // Ripristina le tendine complete
+            popolaSelect();
         }
 
         function cerca() {
@@ -472,11 +510,11 @@
                     html += '<div class="links">';
                     
                     if (hasUrl) {
-                        html += `<a href="${record.Url}" target="_blank" class="link-button">📚 Record EBSCOhost</a>`;
+                        html += `<a href="${record.Url}" target="_blank" class="link-button">🔚 Record EBSCOhost</a>`;
                     }
 
                     if (hasPdf) {
-                        html += `<a href="${record['File Attachments']}" target="_blank" rel="nofollow noopener" class="link-button pdf">📄 Visualizza PDF</a>`;
+                        html += `<a href="${record['File Attachments']}" target="_blank" rel="nofollow noopener noreferrer" class="link-button pdf">📄 Visualizza PDF</a>`;
                     }
 
                     html += '</div>';
