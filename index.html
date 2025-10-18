@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Laura Invernizzi - invernizzil@ftis.it">
-    <meta name="referrer" content="no-referrer">
     <title>Ricerca Database Teologia</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
@@ -510,11 +509,11 @@
                     html += '<div class="links">';
                     
                     if (hasUrl) {
-                        html += `<a href="${record.Url}" target="_blank" class="link-button">🔚 Record EBSCOhost</a>`;
+                        html += `<a href="${record.Url}" target="_blank" class="link-button">📚 Record EBSCOhost</a>`;
                     }
 
                     if (hasPdf) {
-                        html += `<a href="${record['File Attachments']}" target="_blank" rel="nofollow noopener noreferrer" class="link-button pdf">📄 Visualizza PDF</a>`;
+                        html += `<a href="${record['File Attachments']}" target="_blank" class="link-button pdf">📄 Visualizza PDF</a>`;
                     }
 
                     html += '</div>';
