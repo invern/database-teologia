@@ -160,16 +160,7 @@
             font-size: 0.95em;
             font-weight: 500;
             transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            cursor: pointer;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1;
-            height: 42px;
-            box-sizing: border-box;
-            vertical-align: middle;
+            display: inline-block;
         }
 
         .link-button:hover {
@@ -523,7 +514,7 @@
                     }
 
                     if (hasPdf) {
-                        html += `<button onclick="visualizzaPDF('${record['File Attachments'].replace(/'/g, "\\'")}', '${record.Title ? record.Title.replace(/'/g, "\\'") : 'Documento'}', this)" class="link-button pdf">📄 Visualizza PDF</button>`;
+                        html += `<a href="#" onclick="event.preventDefault(); visualizzaPDF('${record['File Attachments'].replace(/'/g, "\\'")}', '${record.Title ? record.Title.replace(/'/g, "\\'") : 'Documento'}'); return false;" class="link-button pdf">📄 Visualizza PDF</a>`;
                     }
 
                     html += '</div>';
