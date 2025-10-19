@@ -551,28 +551,41 @@
                 padding: 20px;
             `;
             
-            viewer.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h2 style="color: white; margin: 0; font-size: 1.2em; max-width: 70%;">${titolo}</h2>
-                    <button onclick="chiudiPDF()" style="
-                        background: #e53e3e;
-                        color: white;
-                        border: none;
-                        padding: 10px 20px;
-                        border-radius: 6px;
-                        cursor: pointer;
-                        font-size: 1em;
-                        font-weight: 600;
-                    ">✕ Chiudi</button>
-                </div>
-                <iframe src="${url}" style="
-                    width: 100%;
-                    height: 100%;
-                    border: none;
-                    border-radius: 8px;
-                    background: white;
-                "></iframe>
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = '✕ Chiudi';
+            closeBtn.style.cssText = `
+                background: #e53e3e;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 1em;
+                font-weight: 600;
             `;
+            closeBtn.addEventListener('click', chiudiPDF);
+            
+            const header = document.createElement('div');
+            header.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;';
+            
+            const title = document.createElement('h2');
+            title.textContent = titolo;
+            title.style.cssText = 'color: white; margin: 0; font-size: 1.2em; max-width: 70%;';
+            
+            const iframe = document.createElement('iframe');
+            iframe.src = url;
+            iframe.style.cssText = `
+                width: 100%;
+                height: 100%;
+                border: none;
+                border-radius: 8px;
+                background: white;
+            `;
+            
+            header.appendChild(title);
+            header.appendChild(closeBtn);
+            viewer.appendChild(header);
+            viewer.appendChild(iframe);
             
             document.body.appendChild(viewer);
             
