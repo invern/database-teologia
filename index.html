@@ -451,7 +451,7 @@
 
             let html = `<div class="result-count">Trovati ${risultati.length} risultat${risultati.length === 1 ? 'o' : 'i'}</div>`;
 
-            risultati.forEach(record => {
+            risultati.forEach((record, index) => {
                 html += '<div class="result-item">';
                 
                 if (record.Author) {
@@ -514,7 +514,8 @@
                     }
 
                     if (hasPdf) {
-                        html += `<a href="#" onclick="event.preventDefault(); visualizzaPDF('${record['File Attachments'].replace(/'/g, "\\'")}', '${record.Title ? record.Title.replace(/'/g, "\\'") : 'Documento'}'); return false;" class="link-button pdf">📄 Visualizza PDF</a>`;
+                        // Usa data attributes per evitare problemi con caratteri speciali
+                        html += `<a href="#" data-pdf-url="${record['File Attachments']}" data-pdf-title="${record.Title || 'Documento'}" data-index="${index}" onclick="event.preventDefault(); visualizzaPDFSafe(this); return false;" class="link-button pdf">📄 Visualizza PDF</a>`;
                     }
 
                     html += '</div>';
@@ -526,9 +527,14 @@
             risultatiDiv.innerHTML = html;
         }
 
-        function visualizzaPDF(url, titolo, button) {
-            const risultatiDiv = document.getElementById('risultati');
-            
+        // Nuova funzione sicura per gestire i link PDF
+        function visualizzaPDFSafe(element) {
+            const url = element.getAttribute('data-pdf-url');
+            const titolo = element.getAttribute('data-pdf-title');
+            visualizzaPDF(url, titolo);
+        }
+
+        function visualizzaPDF(url, titolo) {
             // Rimuovi eventuali visualizzatori già aperti
             const existingViewer = document.querySelector('.pdf-viewer');
             if (existingViewer) {
