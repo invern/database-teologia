@@ -1,683 +1,667 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="it">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.4">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Laura Invernizzi - invernizzil@ftis.it">
+    <title>Ricerca Database Teologia</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2em;
+        }
+
+        .search-form {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        input, select {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        select:disabled {
+            background: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        button {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .result-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .result-field {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #667eea;
+            margin-right: 8px;
+        }
+
+        .result-value {
+            color: #333;
+        }
+
+        .links {
+            margin-top: 15px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .link-button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.95em;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .link-button:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .link-button.pdf {
+            background: #e53e3e;
+        }
+
+        .link-button.pdf:hover {
+            background: #c53030;
+        }
+
+        .info-message {
+            padding: 10px 20px;
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            font-size: 0.95em;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 2px solid #c3e6cb;
+            text-align: center;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .result-count {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .links {
+                flex-direction: column;
+            }
+
+            .link-button {
+                text-align: center;
+            }
+        }
+    </style>
 </head>
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="it"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="author" content="Laura Invernizzi - invernizzil@ftis.it"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;Ricerca Database Teologia&lt;/title&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"&gt;&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>* {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-sizing: border-box;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>body {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>min-height: 100vh;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.container {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>max-width: 1000px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin: 0 auto;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: white;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 30px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 20px 60px rgba(0,0,0,0.3);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>h1 {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #333;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 30px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 2em;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.search-form {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: grid;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>gap: 15px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 30px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #f8f9fa;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.form-group {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>flex-direction: column;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>label {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 8px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #555;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 0.95em;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>input, select {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 2px solid #ddd;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 8px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1em;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.3s;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: white;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>input:focus, select:focus {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>outline: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-color: #667eea;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>select {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>select:disabled {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #e9ecef;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: not-allowed;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>button {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 14px 28px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 8px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1.1em;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: transform 0.2s, box-shadow 0.2s;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-top: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>button:hover {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transform: translateY(-2px);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>button:active {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transform: translateY(0);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>button:disabled {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #ccc;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: not-allowed;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transform: none;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.results {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-top: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.result-item {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: white;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 2px solid #e0e0e0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.3s;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.result-item:hover {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-color: #667eea;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transform: translateY(-2px);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.result-field {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>line-height: 1.6;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.result-label {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #667eea;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-right: 8px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.result-value {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #333;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.links {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-top: 15px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>gap: 15px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>flex-wrap: wrap;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.link-button {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 10px 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #667eea;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-decoration: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 6px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 0.95em;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 500;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.3s;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: inline-block;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.link-button:hover {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #5568d3;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transform: translateY(-1px);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.link-button.pdf {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #e53e3e;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.link-button.pdf:hover {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #c53030;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.info-message {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 10px 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #fff3cd;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #856404;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid #ffeaa7;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 6px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 0.95em;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 500;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: inline-block;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.no-results {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 40px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #666;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1.1em;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.loading {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 40px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #667eea;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1.1em;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.success {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #d4edda;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #155724;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 15px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 8px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 2px solid #c3e6cb;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.error {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #fed7d7;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #c53030;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 15px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 8px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.result-count {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #667eea;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1.1em;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>@media (max-width: 768px) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>.container {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>padding: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>h1 {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>font-size: 1.5em;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>.links {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>flex-direction: column;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>.link-button {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="container"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;h1&gt;🔍 Ricerca Database Teologia&lt;/h1&gt;</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="status"&gt;&lt;/div&gt;</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="search-form"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="form-group"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;label for="autore"&gt;Ricerca per Autore:&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;select id="autore" disabled onchange="aggiornaFiltri()"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;option value=""&gt;-- Caricamento in corso --&lt;/option&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/select&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="form-group"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;label for="anno"&gt;Ricerca per Anno:&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;select id="anno" disabled onchange="aggiornaFiltri()"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;option value=""&gt;-- Caricamento in corso --&lt;/option&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/select&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="form-group"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;label for="titolo"&gt;Ricerca per Titolo:&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;input type="text" id="titolo" placeholder="Inserisci una parola del titolo..." disabled&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div style="display: flex; gap: 10px;"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button onclick="cerca()" id="btnCerca" disabled style="flex: 1;"&gt;Cerca&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button onclick="pulisciCampi()" id="btnPulisci" style="flex: 1; background: linear-gradient(135deg, #6c757d 0%, #495057 100%);"&gt;Pulisci campi&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="risultati"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Percorso relativo al CSV nello stesso repository</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const CSV_URL = './database.csv';</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>let datiDatabase = [];</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Carica automaticamente all'avvio</p>
-<p class="p1"><span class="Apple-converted-space">        </span>window.onload = function() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>caricaDatabase();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function caricaDatabase() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const statusDiv = document.getElementById('status');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>statusDiv.innerHTML = '&lt;div class="loading"&gt;Caricamento database in corso...&lt;/div&gt;';</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>fetch(CSV_URL)</p>
-<p class="p1"><span class="Apple-converted-space">                </span>.then(response =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>if (!response.ok) {</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>throw new Error('Impossibile caricare il database (HTTP ' + response.status + ')');</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>return response.text();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>})</p>
-<p class="p1"><span class="Apple-converted-space">                </span>.then(csvText =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>Papa.parse(csvText, {</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>header: true,</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>skipEmptyLines: true,</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>complete: function(results) {</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>datiDatabase = results.data;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>console.log('Database caricato:', datiDatabase.length, 'records');</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>abilitaRicerca();</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>statusDiv.innerHTML = '&lt;div class="success"&gt;✅ Database caricato con successo! (' + datiDatabase.length + ' record)&lt;/div&gt;';</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>// Nascondi il messaggio dopo 3 secondi</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>setTimeout(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                                </span>statusDiv.innerHTML = '';</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>}, 3000);</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>},</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>error: function(error) {</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>console.error('Errore parsing CSV:', error);</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>statusDiv.innerHTML = '&lt;div class="error"&gt;⚠️ Errore nel parsing del database. Verifica il formato del file CSV.&lt;/div&gt;';</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>});</p>
-<p class="p1"><span class="Apple-converted-space">                </span>})</p>
-<p class="p1"><span class="Apple-converted-space">                </span>.catch(error =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>console.error('Errore caricamento:', error);</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>statusDiv.innerHTML = '&lt;div class="error"&gt;⚠️ Impossibile caricare il database. Assicurati che il file database.csv sia presente nella stessa cartella.&lt;/div&gt;';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>});</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function abilitaRicerca() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>popolaSelect();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('autore').disabled = false;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('anno').disabled = false;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('titolo').disabled = false;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btnCerca').disabled = false;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function popolaSelect(filtroAutore = null, filtroAnno = null) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Popola select autori</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const autori = new Set();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>datiDatabase.forEach(record =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (record.Author &amp;&amp; record.Author.trim()) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>// Se c'è un filtro anno, mostra solo autori che hanno pubblicato in quell'anno</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>if (filtroAnno) {</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>if (record['Publication Year'] &amp;&amp; record['Publication Year'].toString().trim() === filtroAnno) {</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>autori.add(record.Author.trim());</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>autori.add(record.Author.trim());</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const autoriOrdinati = Array.from(autori).sort((a, b) =&gt;<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>a.toLowerCase().localeCompare(b.toLowerCase())</p>
-<p class="p1"><span class="Apple-converted-space">            </span>);</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const selectAutore = document.getElementById('autore');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const autoreSelezionato = selectAutore.value;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>selectAutore.innerHTML = '&lt;option value=""&gt;-- Seleziona un autore --&lt;/option&gt;';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>autoriOrdinati.forEach(autore =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const option = document.createElement('option');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>option.value = autore;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>option.textContent = autore;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (autore === autoreSelezionato) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>option.selected = true;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">                </span>selectAutore.appendChild(option);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Popola select anni</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const anni = new Set();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>datiDatabase.forEach(record =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (record['Publication Year'] &amp;&amp; record['Publication Year'].toString().trim()) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>// Se c'è un filtro autore, mostra solo anni in cui ha pubblicato</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>if (filtroAutore) {</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>if (record.Author &amp;&amp; record.Author.trim() === filtroAutore) {</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>anni.add(record['Publication Year'].toString().trim());</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>anni.add(record['Publication Year'].toString().trim());</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const anniOrdinati = Array.from(anni).sort((a, b) =&gt; b - a);</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const selectAnno = document.getElementById('anno');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const annoSelezionato = selectAnno.value;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>selectAnno.innerHTML = '&lt;option value=""&gt;-- Seleziona un anno --&lt;/option&gt;';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>anniOrdinati.forEach(anno =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const option = document.createElement('option');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>option.value = anno;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>option.textContent = anno;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (anno === annoSelezionato) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>option.selected = true;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">                </span>selectAnno.appendChild(option);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function aggiornaFiltri() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const autoreSelezionato = document.getElementById('autore').value;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const annoSelezionato = document.getElementById('anno').value;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (autoreSelezionato) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>popolaSelect(autoreSelezionato, null);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} else if (annoSelezionato) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>popolaSelect(null, annoSelezionato);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>popolaSelect();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function pulisciCampi() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('autore').selectedIndex = 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('anno').selectedIndex = 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('titolo').value = '';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('risultati').innerHTML = '';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Ripristina le tendine complete</p>
-<p class="p1"><span class="Apple-converted-space">            </span>popolaSelect();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function cerca() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const autore = document.getElementById('autore').value.trim();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const anno = document.getElementById('anno').value.trim();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const titolo = document.getElementById('titolo').value.toLowerCase().trim();</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>let risultati = datiDatabase.filter(record =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>let match = true;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (autore) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>match = match &amp;&amp; record.Author &amp;&amp; record.Author.trim() === autore;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (anno) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>match = match &amp;&amp; record['Publication Year'] &amp;&amp;<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                           </span>record['Publication Year'].toString().trim() === anno;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (titolo) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>match = match &amp;&amp; record.Title &amp;&amp;<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                           </span>record.Title.toLowerCase().includes(titolo);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>return match;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>mostraRisultati(risultati);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function mostraRisultati(risultati) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const risultatiDiv = document.getElementById('risultati');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (risultati.length === 0) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>risultatiDiv.innerHTML = '&lt;div class="no-results"&gt;Nessun risultato trovato. Prova con altri criteri.&lt;/div&gt;';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>let html = `&lt;div class="result-count"&gt;Trovati ${risultati.length} risultat${risultati.length === 1 ? 'o' : 'i'}&lt;/div&gt;`;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>risultati.forEach((record, index) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>html += '&lt;div class="result-item"&gt;';</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (record.Author) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>html += `&lt;div class="result-field"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="result-label"&gt;Autore:&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="result-value"&gt;${record.Author}&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;`;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (record.Title) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>html += `&lt;div class="result-field"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="result-label"&gt;Titolo:&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="result-value"&gt;${record.Title}&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;`;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (record['Publication Year']) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>html += `&lt;div class="result-field"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="result-label"&gt;Anno:&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="result-value"&gt;${record['Publication Year']}&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;`;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (record.Volume) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>html += `&lt;div class="result-field"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="result-label"&gt;Volume:&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="result-value"&gt;${record.Volume}&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;`;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (record.Issue) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>html += `&lt;div class="result-field"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="result-label"&gt;Fascicolo:&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="result-value"&gt;${record.Issue}&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;`;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (record.Pages) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>html += `&lt;div class="result-field"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="result-label"&gt;Pagine:&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="result-value"&gt;${record.Pages}&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;`;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (record['Abstract Note'] &amp;&amp; record['Abstract Note'].trim()) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>html += `&lt;div class="result-field" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="result-label"&gt;Abstract:&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="result-value" style="margin-top: 8px; text-align: justify; line-height: 1.8;"&gt;${record['Abstract Note']}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;`;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>const hasUrl = record.Url &amp;&amp; record.Url.trim();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const fileAttachment = record['File Attachments'] ? record['File Attachments'].trim() : '';</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>// Verifica se contiene il messaggio "articolo recente"</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const isRecentArticle = fileAttachment.toLowerCase().includes('articolo recente') ||<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                                       </span>fileAttachment.toLowerCase().includes('pdf non') ||</p>
-<p class="p1"><span class="Apple-converted-space">                                       </span>fileAttachment.toLowerCase().includes('non è scaricabile');</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>const hasPdf = fileAttachment &amp;&amp; !isRecentArticle;</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (hasUrl || hasPdf || isRecentArticle) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>html += '&lt;div class="links"&gt;';</p>
-<p class="p2"><span class="Apple-converted-space">                    </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>if (hasUrl) {</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>html += `&lt;a href="${record.Url}" target="_blank" class="link-button"&gt;📚 Record EBSCOhost&lt;/a&gt;`;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>if (hasPdf) {</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>// Usa data attributes per evitare problemi con caratteri speciali</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>html += `&lt;a href="#" data-pdf-url="${fileAttachment}" data-pdf-title="${record.Title || 'Documento'}" data-index="${index}" onclick="event.preventDefault(); visualizzaPDFSafe(this); return false;" class="link-button pdf"&gt;📄 Visualizza PDF&lt;/a&gt;`;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>} else if (isRecentArticle) {</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>// Mostra il messaggio informativo</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>html += `&lt;span class="info-message"&gt;ℹ️ ${fileAttachment}&lt;/span&gt;`;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>html += '&lt;/div&gt;';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>html += '&lt;/div&gt;';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>risultatiDiv.innerHTML = html;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Nuova funzione sicura per gestire i link PDF</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function visualizzaPDFSafe(element) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const url = element.getAttribute('data-pdf-url');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const titolo = element.getAttribute('data-pdf-title');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>visualizzaPDF(url, titolo);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function visualizzaPDF(url, titolo) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Converte l'URL di Google Drive in formato embed/preview</p>
-<p class="p1"><span class="Apple-converted-space">            </span>let embedUrl = url;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Se l'URL è nel formato /view o /file/d/, convertilo in /preview</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (url.includes('drive.google.com')) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (fileIdMatch) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>const fileId = fileIdMatch[1];</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>// Usa /preview che è più restrittivo per il download</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Rimuovi eventuali visualizzatori già aperti</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const existingViewer = document.querySelector('.pdf-viewer');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (existingViewer) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>existingViewer.remove();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Crea il visualizzatore</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const viewer = document.createElement('div');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>viewer.className = 'pdf-viewer';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>viewer.style.cssText = `</p>
-<p class="p1"><span class="Apple-converted-space">                </span>position: fixed;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>top: 0;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>left: 0;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>height: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>background: rgba(0,0,0,0.9);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>z-index: 9999;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>flex-direction: column;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>padding: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>`;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const closeBtn = document.createElement('button');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>closeBtn.textContent = '✕ Chiudi';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>closeBtn.style.cssText = `</p>
-<p class="p1"><span class="Apple-converted-space">                </span>background: #e53e3e;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>color: white;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>border: none;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>padding: 10px 20px;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>border-radius: 6px;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>font-size: 1em;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>`;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>closeBtn.addEventListener('click', chiudiPDF);</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const header = document.createElement('div');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>header.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;';</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const title = document.createElement('h2');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>title.textContent = titolo;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>title.style.cssText = 'color: white; margin: 0; font-size: 1.2em; max-width: 70%;';</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const iframe = document.createElement('iframe');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>iframe.src = embedUrl;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>iframe.style.cssText = `</p>
-<p class="p1"><span class="Apple-converted-space">                </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>height: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>border: none;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>border-radius: 8px;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>background: white;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>`;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Impedisce il click destro sull'iframe (protezione base)</p>
-<p class="p1"><span class="Apple-converted-space">            </span>iframe.addEventListener('contextmenu', (e) =&gt; e.preventDefault());</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>header.appendChild(title);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>header.appendChild(closeBtn);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>viewer.appendChild(header);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>viewer.appendChild(iframe);</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.body.appendChild(viewer);</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Blocca lo scroll della pagina</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.body.style.overflow = 'hidden';</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function chiudiPDF() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const viewer = document.querySelector('.pdf-viewer');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (viewer) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>viewer.remove();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Ripristina lo scroll</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.body.style.overflow = 'auto';</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Chiudi con tasto ESC</p>
-<p class="p1"><span class="Apple-converted-space">        </span>document.addEventListener('keydown', function(e) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (e.key === 'Escape') {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>chiudiPDF();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>document.addEventListener('DOMContentLoaded', function() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const titoloInput = document.getElementById('titolo');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (titoloInput) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>titoloInput.addEventListener('keypress', function(e) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>if (e.key === 'Enter' &amp;&amp; !titoloInput.disabled) {</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>cerca();</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">                </span>});</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>});</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+    <div class="container">
+        <h1>🔍 Ricerca Database Teologia</h1>
+        
+        <div id="status"></div>
+        
+        <div class="search-form">
+            <div class="form-group">
+                <label for="autore">Ricerca per Autore:</label>
+                <select id="autore" disabled onchange="aggiornaFiltri()">
+                    <option value="">-- Caricamento in corso --</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="anno">Ricerca per Anno:</label>
+                <select id="anno" disabled onchange="aggiornaFiltri()">
+                    <option value="">-- Caricamento in corso --</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="titolo">Ricerca per Titolo:</label>
+                <input type="text" id="titolo" placeholder="Inserisci una parola del titolo..." disabled>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button onclick="cerca()" id="btnCerca" disabled style="flex: 1;">Cerca</button>
+                <button onclick="pulisciCampi()" id="btnPulisci" style="flex: 1; background: linear-gradient(135deg, #6c757d 0%, #495057 100%);">Pulisci campi</button>
+            </div>
+        </div>
+
+        <div id="risultati"></div>
+    </div>
+
+    <script>
+        // Percorso relativo al CSV nello stesso repository
+        const CSV_URL = './database.csv';
+        
+        let datiDatabase = [];
+
+        // Carica automaticamente all'avvio
+        window.onload = function() {
+            caricaDatabase();
+        };
+
+        function caricaDatabase() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '<div class="loading">Caricamento database in corso...</div>';
+
+            fetch(CSV_URL)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Impossibile caricare il database (HTTP ' + response.status + ')');
+                    }
+                    return response.text();
+                })
+                .then(csvText => {
+                    Papa.parse(csvText, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: function(results) {
+                            datiDatabase = results.data;
+                            console.log('Database caricato:', datiDatabase.length, 'records');
+                            abilitaRicerca();
+                            statusDiv.innerHTML = '<div class="success">✅ Database caricato con successo! (' + datiDatabase.length + ' record)</div>';
+                            // Nascondi il messaggio dopo 3 secondi
+                            setTimeout(() => {
+                                statusDiv.innerHTML = '';
+                            }, 3000);
+                        },
+                        error: function(error) {
+                            console.error('Errore parsing CSV:', error);
+                            statusDiv.innerHTML = '<div class="error">⚠️ Errore nel parsing del database. Verifica il formato del file CSV.</div>';
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Errore caricamento:', error);
+                    statusDiv.innerHTML = '<div class="error">⚠️ Impossibile caricare il database. Assicurati che il file database.csv sia presente nella stessa cartella.</div>';
+                });
+        }
+
+        function abilitaRicerca() {
+            popolaSelect();
+            document.getElementById('autore').disabled = false;
+            document.getElementById('anno').disabled = false;
+            document.getElementById('titolo').disabled = false;
+            document.getElementById('btnCerca').disabled = false;
+        }
+
+        function popolaSelect(filtroAutore = null, filtroAnno = null) {
+            // Popola select autori
+            const autori = new Set();
+            datiDatabase.forEach(record => {
+                if (record.Author && record.Author.trim()) {
+                    // Se c'è un filtro anno, mostra solo autori che hanno pubblicato in quell'anno
+                    if (filtroAnno) {
+                        if (record['Publication Year'] && record['Publication Year'].toString().trim() === filtroAnno) {
+                            autori.add(record.Author.trim());
+                        }
+                    } else {
+                        autori.add(record.Author.trim());
+                    }
+                }
+            });
+            
+            const autoriOrdinati = Array.from(autori).sort((a, b) => 
+                a.toLowerCase().localeCompare(b.toLowerCase())
+            );
+            
+            const selectAutore = document.getElementById('autore');
+            const autoreSelezionato = selectAutore.value;
+            selectAutore.innerHTML = '<option value="">-- Seleziona un autore --</option>';
+            autoriOrdinati.forEach(autore => {
+                const option = document.createElement('option');
+                option.value = autore;
+                option.textContent = autore;
+                if (autore === autoreSelezionato) {
+                    option.selected = true;
+                }
+                selectAutore.appendChild(option);
+            });
+
+            // Popola select anni
+            const anni = new Set();
+            datiDatabase.forEach(record => {
+                if (record['Publication Year'] && record['Publication Year'].toString().trim()) {
+                    // Se c'è un filtro autore, mostra solo anni in cui ha pubblicato
+                    if (filtroAutore) {
+                        if (record.Author && record.Author.trim() === filtroAutore) {
+                            anni.add(record['Publication Year'].toString().trim());
+                        }
+                    } else {
+                        anni.add(record['Publication Year'].toString().trim());
+                    }
+                }
+            });
+            
+            const anniOrdinati = Array.from(anni).sort((a, b) => b - a);
+            
+            const selectAnno = document.getElementById('anno');
+            const annoSelezionato = selectAnno.value;
+            selectAnno.innerHTML = '<option value="">-- Seleziona un anno --</option>';
+            anniOrdinati.forEach(anno => {
+                const option = document.createElement('option');
+                option.value = anno;
+                option.textContent = anno;
+                if (anno === annoSelezionato) {
+                    option.selected = true;
+                }
+                selectAnno.appendChild(option);
+            });
+        }
+
+        function aggiornaFiltri() {
+            const autoreSelezionato = document.getElementById('autore').value;
+            const annoSelezionato = document.getElementById('anno').value;
+            
+            if (autoreSelezionato) {
+                popolaSelect(autoreSelezionato, null);
+            } else if (annoSelezionato) {
+                popolaSelect(null, annoSelezionato);
+            } else {
+                popolaSelect();
+            }
+        }
+
+        function pulisciCampi() {
+            document.getElementById('autore').selectedIndex = 0;
+            document.getElementById('anno').selectedIndex = 0;
+            document.getElementById('titolo').value = '';
+            document.getElementById('risultati').innerHTML = '';
+            // Ripristina le tendine complete
+            popolaSelect();
+        }
+
+        function cerca() {
+            const autore = document.getElementById('autore').value.trim();
+            const anno = document.getElementById('anno').value.trim();
+            const titolo = document.getElementById('titolo').value.toLowerCase().trim();
+
+            let risultati = datiDatabase.filter(record => {
+                let match = true;
+
+                if (autore) {
+                    match = match && record.Author && record.Author.trim() === autore;
+                }
+
+                if (anno) {
+                    match = match && record['Publication Year'] && 
+                           record['Publication Year'].toString().trim() === anno;
+                }
+
+                if (titolo) {
+                    match = match && record.Title && 
+                           record.Title.toLowerCase().includes(titolo);
+                }
+
+                return match;
+            });
+
+            mostraRisultati(risultati);
+        }
+
+        function mostraRisultati(risultati) {
+            const risultatiDiv = document.getElementById('risultati');
+
+            if (risultati.length === 0) {
+                risultatiDiv.innerHTML = '<div class="no-results">Nessun risultato trovato. Prova con altri criteri.</div>';
+                return;
+            }
+
+            let html = `<div class="result-count">Trovati ${risultati.length} risultat${risultati.length === 1 ? 'o' : 'i'}</div>`;
+
+            risultati.forEach((record, index) => {
+                html += '<div class="result-item">';
+                
+                if (record.Author) {
+                    html += `<div class="result-field">
+                        <span class="result-label">Autore:</span>
+                        <span class="result-value">${record.Author}</span>
+                    </div>`;
+                }
+
+                if (record.Title) {
+                    html += `<div class="result-field">
+                        <span class="result-label">Titolo:</span>
+                        <span class="result-value">${record.Title}</span>
+                    </div>`;
+                }
+
+                if (record['Publication Year']) {
+                    html += `<div class="result-field">
+                        <span class="result-label">Anno:</span>
+                        <span class="result-value">${record['Publication Year']}</span>
+                    </div>`;
+                }
+
+                if (record.Volume) {
+                    html += `<div class="result-field">
+                        <span class="result-label">Volume:</span>
+                        <span class="result-value">${record.Volume}</span>
+                    </div>`;
+                }
+
+                if (record.Issue) {
+                    html += `<div class="result-field">
+                        <span class="result-label">Fascicolo:</span>
+                        <span class="result-value">${record.Issue}</span>
+                    </div>`;
+                }
+
+                if (record.Pages) {
+                    html += `<div class="result-field">
+                        <span class="result-label">Pagine:</span>
+                        <span class="result-value">${record.Pages}</span>
+                    </div>`;
+                }
+
+                if (record['Abstract Note'] && record['Abstract Note'].trim()) {
+                    html += `<div class="result-field" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                        <span class="result-label">Abstract:</span>
+                        <div class="result-value" style="margin-top: 8px; text-align: justify; line-height: 1.8;">${record['Abstract Note']}</div>
+                    </div>`;
+                }
+
+                const hasUrl = record.Url && record.Url.trim();
+                const fileAttachment = record['File Attachments'] ? record['File Attachments'].trim() : '';
+                
+                // Verifica se contiene il messaggio "articolo recente"
+                const isRecentArticle = fileAttachment.toLowerCase().includes('articolo recente') || 
+                                       fileAttachment.toLowerCase().includes('pdf non') ||
+                                       fileAttachment.toLowerCase().includes('non è scaricabile');
+                
+                const hasPdf = fileAttachment && !isRecentArticle;
+                
+                if (hasUrl || hasPdf || isRecentArticle) {
+                    html += '<div class="links">';
+                    
+                    if (hasUrl) {
+                        html += `<a href="${record.Url}" target="_blank" class="link-button">📚 Record EBSCOhost</a>`;
+                    }
+
+                    if (hasPdf) {
+                        // Usa data attributes per evitare problemi con caratteri speciali
+                        html += `<a href="#" data-pdf-url="${fileAttachment}" data-pdf-title="${record.Title || 'Documento'}" data-index="${index}" onclick="event.preventDefault(); visualizzaPDFSafe(this); return false;" class="link-button pdf">📄 Visualizza PDF</a>`;
+                    } else if (isRecentArticle) {
+                        // Mostra il messaggio informativo
+                        html += `<span class="info-message">ℹ️ ${fileAttachment}</span>`;
+                    }
+
+                    html += '</div>';
+                }
+
+                html += '</div>';
+            });
+
+            risultatiDiv.innerHTML = html;
+        }
+
+        // Nuova funzione sicura per gestire i link PDF
+        function visualizzaPDFSafe(element) {
+            const url = element.getAttribute('data-pdf-url');
+            const titolo = element.getAttribute('data-pdf-title');
+            visualizzaPDF(url, titolo);
+        }
+
+        function visualizzaPDF(url, titolo) {
+            // Converte l'URL di Google Drive in formato embed/preview
+            let embedUrl = url;
+            
+            // Se l'URL è nel formato /view o /file/d/, convertilo in /preview
+            if (url.includes('drive.google.com')) {
+                const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                if (fileIdMatch) {
+                    const fileId = fileIdMatch[1];
+                    // Usa /preview che è più restrittivo per il download
+                    embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+                }
+            }
+            
+            // Rimuovi eventuali visualizzatori già aperti
+            const existingViewer = document.querySelector('.pdf-viewer');
+            if (existingViewer) {
+                existingViewer.remove();
+            }
+            
+            // Crea il visualizzatore
+            const viewer = document.createElement('div');
+            viewer.className = 'pdf-viewer';
+            viewer.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.9);
+                z-index: 9999;
+                display: flex;
+                flex-direction: column;
+                padding: 20px;
+            `;
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = '✕ Chiudi';
+            closeBtn.style.cssText = `
+                background: #e53e3e;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 1em;
+                font-weight: 600;
+            `;
+            closeBtn.addEventListener('click', chiudiPDF);
+            
+            const header = document.createElement('div');
+            header.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;';
+            
+            const title = document.createElement('h2');
+            title.textContent = titolo;
+            title.style.cssText = 'color: white; margin: 0; font-size: 1.2em; max-width: 70%;';
+            
+            const iframe = document.createElement('iframe');
+            iframe.src = embedUrl;
+            iframe.style.cssText = `
+                width: 100%;
+                height: 100%;
+                border: none;
+                border-radius: 8px;
+                background: white;
+            `;
+            
+            // Impedisce il click destro sull'iframe (protezione base)
+            iframe.addEventListener('contextmenu', (e) => e.preventDefault());
+            
+            header.appendChild(title);
+            header.appendChild(closeBtn);
+            viewer.appendChild(header);
+            viewer.appendChild(iframe);
+            
+            document.body.appendChild(viewer);
+            
+            // Blocca lo scroll della pagina
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function chiudiPDF() {
+            const viewer = document.querySelector('.pdf-viewer');
+            if (viewer) {
+                viewer.remove();
+            }
+            // Ripristina lo scroll
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Chiudi con tasto ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                chiudiPDF();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const titoloInput = document.getElementById('titolo');
+            if (titoloInput) {
+                titoloInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && !titoloInput.disabled) {
+                        cerca();
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
