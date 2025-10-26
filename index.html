@@ -34,6 +34,16 @@
             margin-bottom: 30px;
             text-align: center;
             font-size: 2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .logo {
+            max-height: 60px;
+            max-width: 80px;
+            object-fit: contain;
         }
 
         .search-form {
@@ -235,6 +245,12 @@
 
             h1 {
                 font-size: 1.5em;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .logo {
+                max-height: 50px;
             }
 
             .links {
@@ -249,7 +265,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>🔍 Ricerca Database Teologia</h1>
+        <h1>
+            <img src="logo.png" alt="Logo" class="logo">
+            🔍 Ricerca Database Teologia
+        </h1>
         
         <div id="status"></div>
         
@@ -386,7 +405,7 @@
                 }
             });
             
-            const anniOrdinati = Array.from(anni).sort((a, b) => b - a);
+            const anniOrdinati = Array.from(anni).sort((a, b) => a - b);
             
             const selectAnno = document.getElementById('anno');
             const annoSelezionato = selectAnno.value;
